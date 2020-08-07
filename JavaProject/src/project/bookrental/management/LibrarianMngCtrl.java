@@ -365,6 +365,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 				for(; j<sbList.size(); j++) {
 					if(!sbList.get(j).getBookId().equals(bookId)) {
 						System.out.println("~~~ 존재하지 않는 도서ID 입니다. 다시 입력하세요!! ~~~\n");
+						i--;
 					// 도서ID 입력 시
 					} else {
 						boolean state = sbList.get(i).getIsLendable(); // 도서 대여상태
