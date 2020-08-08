@@ -6,7 +6,8 @@ public class LibraryMngMainExecution {
 
 	public static void main(String[] args) {
 		
-		InterLibrarymngctrl ilmc = new LibrarianMngCtrl();
+		InterLibrarymngctrl lctrl = new LibrarianMngCtrl();
+		InterLibrarymngctrl mctrl = new MemberMngCtrl();
 		
 		Scanner sc = new Scanner(System.in);
 		
@@ -20,17 +21,18 @@ public class LibraryMngMainExecution {
 			switch(pMenuNo) {
 				// 사서 전용메뉴
 				case "1" :
-					ilmc.onlyLibrarian(sc);
+					lctrl.onlyLibrarian(sc);
 					break;
 				// 일반회원 전용메뉴
 				case "2" :
-					ilmc.onlyUser(sc);
+					mctrl.onlyUser(sc);
 					break;
 				// 프로그램 종료
 				case "3" :
 					break;
 				// 이외의 값 입력 시
 				default :
+					System.out.println(">>> 메뉴에 없는 번호 입니다. 다시 선택하세요!!");
 					break;
 			} // end of switch~case
 		} while(!"3".equals(pMenuNo)); // end of do~while

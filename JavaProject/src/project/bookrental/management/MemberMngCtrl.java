@@ -12,6 +12,7 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 
 	private final String MEMBERLISTFILENAME = "C:/iotestdata/project/librarymng/memberlist.dat";
 	private final String SBOOKFILENAME = "C:/iotestdata/project/librarymng/separatebook.dat";
+	private final String RENTALBOOKLISTFILENAME = "C:/iotestdata/project/librarymng/rentallist.dat";
 	private LibMngSerializable serial = new LibMngSerializable();
 
 	// 일반회원 전용메뉴
@@ -22,7 +23,7 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 		String memMenuSecond = "1.일반회원가입\t2.로그인\t3.로그아웃\t4.도서검색하기\t5.나의대여현황보기\t6.나가기\n" + "=> 메뉴번호선택 : ";
 		String memMenuNo = "";
 		do {
-			String memMenuFirst = (mDTO != null) ? "\n>>>> 일반회원 전용 Menu <<<<"
+			String memMenuFirst = (mDTO==null) ? "\n>>>> 일반회원 전용 Menu <<<<"
 					: "\n>>>> 일반회원 전용 Menu [" + mDTO.getMemName() + " 로그인중..]<<<<";
 			System.out.println(memMenuFirst);
 			System.out.print(memMenuSecond);
@@ -34,14 +35,18 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 				break;
 			// 로그인
 			case "2":
-				loginUser(sc);
+				if(mDTO != null) {
+					System.out.println("~~~~ 이미 로그인된 상태입니다!!!");
+				} else {
+					mDTO = loginUser(sc);
+				}
 				break;
 			// 로그아웃
 			case "3":
+				mDTO = null;
 				break;
 			// 도서검색하기
 			case "4":
-				mDTO = loginUser(sc);
 				if(mDTO!=null) {
 					searchBook(mDTO, sc);
 				} else {
@@ -50,12 +55,17 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 				break;
 			// 나의대여현황보기
 			case "5":
-				
+				if(mDTO!=null) {
+					myRentalBookInfo(mDTO, sc);
+				} else {
+					System.out.println(">>> 회원 전용 로그인을 해주세요!! <<<");
+				}
 				break;
 			// 나가기
 			case "6":
 				break;
 			default:
+				System.out.println(">>> 메뉴에 없는 번호 입니다. 다시 선택하세요!!");
 				break;
 			}
 		} while (!"6".equals(memMenuNo)); // end of do~while
@@ -78,13 +88,13 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 			} // end of if~else
 		} while (true); // end of do~while
 
-		System.out.println("▶ 암호: ");
+		System.out.print("▶ 암호: ");
 		String memPwd = sc.nextLine();
 
-		System.out.println("▶ 성명: ");
+		System.out.print("▶ 성명: ");
 		String memName = sc.nextLine();
 
-		System.out.println("▶ 연락처: ");
+		System.out.print("▶ 연락처: ");
 		String memPhone = sc.nextLine();
 
 		MemberDTO mDTO = new MemberDTO(memId, memPwd, memName, memPhone);
@@ -141,15 +151,20 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 		System.out.print("▶ 암호: ");
 		String memPwd = sc.nextLine();
 
+		boolean status = false;
 		for (int i = 0; i < memList.size(); i++) {
 			if (memList.get(i).getMemId().equals(memId) && memList.get(i).getMemPwd().equals(memPwd)) {
 				mDTO = memList.get(i);
-				System.out.println(">>> 로그인 성공!!! <<<");
+				status = true;
 				break;
-			} else {
-				System.out.println(">>> 로그인 실패!!! <<<");
 			} // end of if
 		} // end of for
+		
+		if(status) {
+			System.out.println(">>> 로그인 성공!!! <<<");
+		} else {
+			System.out.println(">>> 로그인 실패!!! <<<");
+		}
 
 		return mDTO;
 	} // end of loginUser()
@@ -175,66 +190,102 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 		
 		// 하나의 조건을 거쳐가며 모든 조건을 만족하는 객체 찾아낸다.
 		// 조건을 거치며 찾아낸 객체는 List에 저장하고 업데이트한다.
-		List<SeparateBookDTO> newList = new ArrayList<>();
+		// 검색값이 존재하지 않는 것이라면 해당 리스트의 새로운 리스트 객체를 넘겨주어 null의 크기를 요하는 에러를 방지한다.
+		List<SeparateBookDTO> newList = null;
 		// 카테고리 조건을 만족하는 객체를 새로운 리스트에 저장하고 공백 시 파일로 불러온 리스트를 그대로 새로운 리스트로 넘겨준다.
 		if(!category.trim().isEmpty()) {
 			for(int i=0; i<sbList.size(); i++) {
-				if(category.equals(sbList.get(i).getBookDTO().getCategory())) {
+				if(category.equalsIgnoreCase(sbList.get(i).getBookDTO().getCategory())) {
 					bDTO = sbList.get(i);
 					newList.add(bDTO);
-				} else { 
-					System.out.println("~~~~ 검색에 일치하는 도서가 없습니다. ~~~~");
-				}// end of if
+				} else {
+					newList = new ArrayList<>();
+				} // end of if
 			} // end of for
 		} else {
 			newList = sbList;
 		} // end of if
 		
+		List<SeparateBookDTO> newList2 = null;
 		// 도서명 조건을 만족하는 객체를 새로운 리스트에 추가하고 공백 시 그대로 리스트를 넘겨준다.
 		if(!bookName.trim().isEmpty()) {
-			for(int i=0; i<sbList.size(); i++) {
-				if(bookName.equals(sbList.get(i).getBookDTO().getBookName())) {
-					bDTO = sbList.get(i);
-					newList.add(bDTO);
-				} else { 
-					System.out.println("~~~~ 검색에 일치하는 도서가 없습니다. ~~~~");
-				}// end of if
+			for(int i=0; i<newList.size(); i++) {
+				if(bookName.equalsIgnoreCase(sbList.get(i).getBookDTO().getBookName())) {
+					bDTO = newList.get(i);
+					newList2.add(bDTO);
+				} else {
+					newList2 = new ArrayList<>();
+				} // end of if
 			} // end of for
+		} else {
+			newList2 = newList;
 		} // end of if
 		
+		List<SeparateBookDTO> newList3 = null;
 		// 작가명 조건을 만족하는 객체를 새로운 리스트에 추가하고 공백 시 그대로 리스트를 넘겨준다.
 		if(!author.trim().isEmpty()) {
-			for(int i=0; i<sbList.size(); i++) {
-				if(author.equals(sbList.get(i).getBookDTO().getAuthor())) {
-					bDTO = sbList.get(i);
-					newList.add(bDTO);
-				} else { 
-					System.out.println("~~~~ 검색에 일치하는 도서가 없습니다. ~~~~");
-				}// end of if
+			for(int i=0; i<newList2.size(); i++) {
+				if(author.equalsIgnoreCase(sbList.get(i).getBookDTO().getAuthor())) {
+					bDTO = newList2.get(i);
+					newList3.add(bDTO);
+				} else {
+					newList3 = new ArrayList<>();
+				} // end of if
 			} // end of for
+		} else {
+			newList3 = newList2;
 		} // end of if
 		
+		List<SeparateBookDTO> newList4 = null;
 		// 출판사명 조건을 만족하는 객체를 새로운 리스트에 추가하고 공백 시 그대로 리스트를 넘겨준다.
 		if(!publisher.trim().isEmpty()) {
-			for(int i=0; i<sbList.size(); i++) {
-				if(publisher.equals(sbList.get(i).getBookDTO().getPublisher())) {
-					bDTO = sbList.get(i);
-					newList.add(bDTO);
-				} else { 
-					System.out.println("~~~~ 검색에 일치하는 도서가 없습니다. ~~~~");
-				}// end of if
+			for(int i=0; i<newList3.size(); i++) {
+				if(publisher.equalsIgnoreCase(sbList.get(i).getBookDTO().getPublisher())) {
+					bDTO = newList3.get(i);
+					newList4.add(bDTO);
+				} else {
+					newList4 = new ArrayList<>();
+				} // end of if
 			} // end of for
+		} else {
+			newList4 = newList3;
 		} // end of if
 		
-		System.out.println("======================================================================\n"
-				+ "ISBN\t도서아이디\t도서명\t작가명\t출판사\t가격\t대여상태\n"
-				+ "======================================================================");
-		// toString() 재정의 및 호출
-		for(SeparateBookDTO dto : newList) {
-			System.out.println(dto);
+		System.out.println("==========================================================================================\n"
+				+ "ISBN\t\t\t도서아이디\t\t\t도서명\t작가명\t출판사\t가격\t대여상태\n"
+				+ "==========================================================================================");
+		if(newList4!=null) {		
+			// toString() 재정의 및 호출
+			for(SeparateBookDTO dto : newList4) {
+				System.out.println(dto);
+			}
+		} else {
+			System.out.println("~~~~ 검색에 일치하는 도서가 없습니다. ~~~~");
 		}
 		
 	} // end of searchBook()
+	
+	@Override
+	public void myRentalBookInfo(MemberDTO mDTO, Scanner sc) {
+		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
+		List<RentalDTO> rList = (ArrayList<RentalDTO>)rListObj;
+		
+		System.out.println("======================================================================\n"
+				+ "도서아이디\tISBN\t도서명\t작가명\t출판사\t회원ID\t대여상태\t반납예정일\n"
+				+ "======================================================================");
+		boolean lendStatus = true;
+		for(int i=0; i<rList.size(); i++) {
+			if(mDTO.getMemId().equals(rList.get(i).getMemId())) {
+				System.out.println(rList.get(i).toStringSnd());
+			} else {
+				lendStatus = false;
+			}
+		}
+		
+		if(!lendStatus) {
+			System.out.println("~~~ 대여해가신 도서가 없습니다. ~~~");
+		}
+	}
 	
 
 	// 사서 전용메뉴
@@ -280,25 +331,12 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	@Override
 	public void lendingBookInfo(LibrarianDTO lDTO) {}
 	
-	
-	
-
-	@Override
-	public void returnBook(Scanner sc) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void myRentalBookInfo(Scanner sc) {
-		// TODO Auto-generated method stub
-
-	}
-
 	@Override
 	public boolean returnDateConf(String memId) {
-		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
+	@Override
+	public void returnBook(LibrarianDTO lDTO, Scanner sc) {}
+	
 }

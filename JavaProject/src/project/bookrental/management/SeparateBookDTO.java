@@ -83,7 +83,13 @@ public class SeparateBookDTO implements Serializable {
 	}
 	
 	public String toString() {
-		return isbn+"\t"+bookId+"\t"+bookDTO.getBookName()+"\t"+bookDTO.getAuthor()+"\t"+bookDTO.getPublisher()+"\t"+getPriceComma(bookDTO.getPrice())+"\t"+sIsLendable(isLendable);
+		return isbn + "\t" +
+				bookId + "\t" + 
+				bookDTO.getBookName() + "    " + 
+				bookDTO.getAuthor() + "\t" +
+				bookDTO.getPublisher() + "\t" + 
+				getPriceComma(bookDTO.getPrice()) + "\t" + 
+				sIsLendable(isLendable);
 	}
 
 }

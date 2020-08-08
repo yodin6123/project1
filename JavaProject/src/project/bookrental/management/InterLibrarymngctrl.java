@@ -72,10 +72,15 @@ public interface InterLibrarymngctrl {
 	
 	boolean returnDateConf(String memId); // 반납예정일 확인
 	
-	void returnBook(Scanner sc);
+	/*
+	 * 도서반납
+	 * 대여DTO에 접근하여 입력받은 반납권수와 도서ID와 일치하는 대여도서 객체를 리스트와 파일에서
+	 * 제거하고 파일로 만들며, 출력을 진행한다.
+	 * 대여DTO에는 연체료 데이터를 초기화할 메서드를 정의한다.
+	 */
+	void returnBook(LibrarianDTO lDTO, Scanner sc); // 도서반납해주기
 
-	
-	
+		
 	/*
 	 * >> 일반회원 전용메뉴 <<
 	 * 메뉴 목록 출력
@@ -108,7 +113,12 @@ public interface InterLibrarymngctrl {
 	 * 입력하지 않았을 때는 조건을 모두 만족하는 조건식을 세운다.
 	 * 출력은 toString 메소드를 재정의하여 출력한다.
 	 */
-	void searchBook(MemberDTO mDTO, Scanner sc);
-	void myRentalBookInfo(Scanner sc);
+	void searchBook(MemberDTO mDTO, Scanner sc); // 도서검색
+	
+	/*
+	 * 나의대여현황보기
+	 * 대여DTO에 접근하여 로그인한 회원 아이디와 일치하는 대여 객체를 결과로 출력한다.
+	 */
+	void myRentalBookInfo(MemberDTO mDTO, Scanner sc); // 나의대여현황
 	
 }
