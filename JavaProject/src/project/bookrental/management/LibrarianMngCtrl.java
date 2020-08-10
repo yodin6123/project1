@@ -2,12 +2,8 @@ package project.bookrental.management;
 
 import java.io.File;
 import java.sql.Date;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class LibrarianMngCtrl implements InterLibrarymngctrl {
 
@@ -102,6 +98,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 	} // end of librarianMenu
 
 	// 사서가입
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerLibrarian(Scanner sc) {
 		System.out.println("\n== 사서가입하기 ==");
@@ -141,6 +138,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		}
 	} // end of registerLibrarian()
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isUseLibID(String id) {
 		// 최초 가입 시 아이디 사용 가능
@@ -158,6 +156,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		return isUse;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public LibrarianDTO loginLibrarian(Scanner sc) {
 		LibrarianDTO lDTO = null;
@@ -183,6 +182,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		return lDTO;
 	} // end of login()
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerBookInfo(LibrarianDTO lDTO, Scanner sc) {
 		System.out.println("\n== 도서정보 등록하기 ==");
@@ -244,6 +244,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 
 	} // end of registerBookInfo()
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isUseIsbn(String isbn) {
 		// 최초 등록 시 ISBN 사용 가능
@@ -263,6 +264,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 	} // end of isUseIsbn
 
 	// 개별도서 등록
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerSeperateBook(LibrarianDTO lDTO, Scanner sc) {
 		Object bookListObj = serial.getObjectFromFile(BOOKLISTFILENAME);
@@ -330,6 +332,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 	} // end of registerSeperateBook()
 
 	// 도서아이디 유효성 검사
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isUseBookId(String bookId) {
 		// 최초 등록 시 ISBN 사용 가능
@@ -349,6 +352,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 	} // end of isUseIsbn
 
 	// 도서대여해주기
+	@SuppressWarnings({ "unchecked", "unused" })
 	@Override
 	public void lendBook(LibrarianDTO lDTO, Scanner sc) {
 		Object mListObj = serial.getObjectFromFile(MEMBERLISTFILENAME);
@@ -370,7 +374,6 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		MemberDTO mDTO = null;
 		String memId = "";
 		// 일치하는 회원ID 입력 시 다음 단계
-		boolean bk = false; // do~while문 빠져나오기 위한 변수
 		boolean confirm = false;
 		while (true) {
 			System.out.print("▶회원ID : ");
@@ -462,6 +465,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 	} // end of lendBook
 
 	// 대여중인도서조회
+	@SuppressWarnings("unchecked")
 	@Override
 	public void lendingBookInfo(LibrarianDTO lDTO) {
 		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
@@ -477,6 +481,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 
 	}
 
+	@SuppressWarnings({ "unchecked", "unused" })
 	@Override
 	public void returnBook(LibrarianDTO lDTO, Scanner sc) {
 		Object sbListObj = serial.getObjectFromFile(SBOOKFILENAME);

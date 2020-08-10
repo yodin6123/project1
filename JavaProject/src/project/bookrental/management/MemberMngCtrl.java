@@ -1,12 +1,7 @@
 package project.bookrental.management;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class MemberMngCtrl implements InterLibrarymngctrl {
 
@@ -73,6 +68,7 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	} // end of onlyUser()
 
 	// 일반회원 가입하기
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerUser(Scanner sc) {
 		System.out.println("\n== 일반회원 가입하기 ==");
@@ -121,6 +117,7 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	} // end of registerUser
 
 	// 일반회원 아이디 유효성 검사
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isUseMemId(String memId) {
 		// 최초 등록 시 일반회원 아이디 사용 가능
@@ -139,6 +136,7 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	} // end of isUseMemId
 
 	// 일반회원 로그인
+	@SuppressWarnings("unchecked")
 	@Override
 	public MemberDTO loginUser(Scanner sc) {
 		MemberDTO mDTO = null;
@@ -170,12 +168,10 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	} // end of loginUser()
 
 	// 도서검색
+	@SuppressWarnings({ "unchecked", "unused" })
 	@Override
 	public void searchBook(MemberDTO mDTO, Scanner sc) {
 		
-
-		SeparateBookDTO bDTO = new SeparateBookDTO();
-
 		System.out.println("\n >>> 도서검색하기 <<<");
 		System.out.println("[주의사항] 검색어를 입력치 않고 엔터를 하면 검색대상에서 제외됩니다.");
 		System.out.print("▶ 도서분류카테고리(Programming , DataBase 등): ");
@@ -268,6 +264,7 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 		
 	} // end of searchBook()
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void myRentalBookInfo(MemberDTO mDTO, Scanner sc) {
 		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);

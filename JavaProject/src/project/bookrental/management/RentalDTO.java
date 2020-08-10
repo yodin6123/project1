@@ -2,12 +2,8 @@ package project.bookrental.management;
 
 import java.io.Serializable;
 import java.sql.Date;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 
 public class RentalDTO implements Serializable {
 
@@ -67,6 +63,7 @@ public class RentalDTO implements Serializable {
 		this.returnDate = returnDate;
 	}
 
+	@SuppressWarnings("unused")
 	public String getFee(String returnDate) {
 		Calendar time = Calendar.getInstance();
 		SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd");
@@ -90,10 +87,6 @@ public class RentalDTO implements Serializable {
 		
 	}
 	
-	public String printFee() {
-		return null;
-	}
-
 	public MemberDTO getmDTO() {
 		return mDTO;
 	}

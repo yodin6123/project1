@@ -1,8 +1,6 @@
 package project.bookrental.management;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.util.Calendar;
 
 public class SeparateBookDTO implements Serializable {
 
@@ -11,7 +9,6 @@ public class SeparateBookDTO implements Serializable {
 	private String bookId;
 	private boolean isLendable; // 대여 중일 때 true, 비치 중일 때 false
 	private BookDTO bookDTO;
-	private Calendar lendDate;
 	
 	public SeparateBookDTO() {}
 	
@@ -56,30 +53,6 @@ public class SeparateBookDTO implements Serializable {
 
 	public void setBookDTO(BookDTO bookDTO) {
 		this.bookDTO = bookDTO;
-	}
-	
-	public Calendar getLendDate() {
-		return lendDate;
-	}
-
-	public void setLendDate(Calendar lendDate) {
-		this.lendDate = lendDate;
-	}
-
-	public String getPriceComma(int price) {
-		DecimalFormat df = new DecimalFormat("#.###");
-		String sPrice = df.format(price);
-		return sPrice;
-	}
-	
-	public String sIsLendable(boolean isLendable) {
-		String strLend = "";
-		if(isLendable) {
-			strLend = "비치중";
-		} else {
-			strLend = "대여중";
-		}
-		return strLend;
 	}
 	
 	public String toString() {
