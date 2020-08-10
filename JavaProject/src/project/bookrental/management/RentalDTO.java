@@ -13,6 +13,7 @@ public class RentalDTO implements Serializable {
 	private String lendDate;
 	private String returnDate;
 	private String fee;
+	private boolean ifExtend; // 연장했었으면 true, 안했었으면 false;
 	private MemberDTO mDTO;
 	private SeparateBookDTO sbDTO;
 	
@@ -102,6 +103,14 @@ public class RentalDTO implements Serializable {
 	public void setSbDTO(SeparateBookDTO sbDTO) {
 		this.sbDTO = sbDTO;
 	}
+	
+	public boolean isIfExtend() {
+		return ifExtend;
+	}
+
+	public void setIfExtend(boolean ifExtend) {
+		this.ifExtend = ifExtend;
+	}
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
@@ -117,7 +126,7 @@ public class RentalDTO implements Serializable {
 				mDTO.getMemName() + "\t" +
 				mDTO.getMemPhone() + "\t" + 
 				lendDate + "\t" +
-				returnDate + "\n";
+				returnDate;
 	}
 	
 	public String toStringSnd() {
@@ -129,6 +138,44 @@ public class RentalDTO implements Serializable {
 				memId + "\t" +
 				lendDate + "\t" +
 				returnDate;
+	}
+	
+	public String toString2() {
+		SimpleDateFormat sdfm = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Calendar time = Calendar.getInstance();
+		String temp = sdfm.format(time.getTime());
+		time.add(Calendar.DATE, 2);
+		String temp2 = sdfm.format(time.getTime());
+		return bookId + "\t" +
+				sbDTO.getIsbn() + "\t" +
+				sbDTO.getBookDTO().getBookName() + "\t" +
+				sbDTO.getBookDTO().getAuthor() + "\t" +
+				sbDTO.getBookDTO().getPublisher() + "\t" +
+				memId + "\t" +
+				mDTO.getMemName() + "\t" +
+				mDTO.getMemPhone() + "\t" + 
+				temp + "\t" +
+				temp2;
+	}
+	
+	public String toStringSnd2() {
+		SimpleDateFormat sdfm = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Calendar time = Calendar.getInstance();
+		String temp = sdfm.format(time.getTime());
+		time.add(Calendar.DATE, 2);
+		String temp2 = sdfm.format(time.getTime());
+		return bookId + "\t" +
+				sbDTO.getIsbn() + "\t" +
+				sbDTO.getBookDTO().getBookName() + "\t" +
+				sbDTO.getBookDTO().getAuthor() + "\t" +
+				sbDTO.getBookDTO().getPublisher() + "\t" +
+				memId + "\t" +
+				mDTO.getMemName() + "\t" +
+				mDTO.getMemPhone() + "\t" + 
+				temp + "\t" +
+				temp2;
 	}
 	
 }

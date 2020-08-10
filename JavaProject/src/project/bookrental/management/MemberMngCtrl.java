@@ -277,7 +277,11 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 		for(int i=0; i<rList.size(); i++) {
 			if(mDTO.getMemId().equals(rList.get(i).getMemId())) {
 				lendStatus = false;
-				System.out.println(rList.get(i).toStringSnd());
+				if (rList.get(i).isIfExtend()) {
+					System.out.println(rList.get(i).toString2());
+				} else {
+					System.out.println(rList.get(i).toString());
+				}
 			} 
 		}
 		
@@ -332,5 +336,17 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	
 	@Override
 	public void returnBook(LibrarianDTO lDTO, Scanner sc) {}
+
+	@Override
+	public void extendBook(LibrarianDTO lDTO, Scanner sc) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showCount(Scanner sc) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

@@ -77,6 +77,8 @@ public interface InterLibrarymngctrl {
 	 * 대여DTO에는 연체료 데이터를 초기화할 메서드를 정의한다.
 	 */
 	void returnBook(LibrarianDTO lDTO, Scanner sc); // 도서반납해주기
+	
+	void extendBook(LibrarianDTO lDTO, Scanner sc); // 도서연장해주기
 
 		
 	/*
@@ -118,5 +120,7 @@ public interface InterLibrarymngctrl {
 	 * 대여DTO에 접근하여 로그인한 회원 아이디와 일치하는 대여 객체를 결과로 출력한다.
 	 */
 	void myRentalBookInfo(MemberDTO mDTO, Scanner sc); // 나의대여현황
+	
+	void showCount(Scanner sc);	
 	
 }

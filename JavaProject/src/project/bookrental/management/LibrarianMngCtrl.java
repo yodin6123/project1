@@ -12,6 +12,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 	private final String SBOOKFILENAME = "C:/iotestdata/project/librarymng/separatebook.dat";
 	private final String MEMBERLISTFILENAME = "C:/iotestdata/project/librarymng/memberlist.dat";
 	private final String RENTALBOOKLISTFILENAME = "C:/iotestdata/project/librarymng/rentallist.dat";
+	private final String COUNTDTOLIST = "C:/iotestdata/project/librarymng/countdtolist.dat";
 	private LibMngSerializable serial = new LibMngSerializable();
 
 	// 사서 전용 메뉴
@@ -20,7 +21,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		LibrarianDTO lDTO = null;
 
 		String libMenuSecond = "1.사서가입\t2.로그인\t3.로그아웃\t4.도서정보등록\t5.개별도서등록\n"
-				+ "6.도서대여해주기\t7.대여중인도서조회\t8.도서반납해주기\t9.나가기\n" + "=> 메뉴번호선택 : ";
+				+ "6.도서대여해주기\t7.대여중인도서조회\t8.도서반납해주기\t9.대출연장\t10.대여횟수조회\t11.나가기\n" + "=> 메뉴번호선택 : ";
 		String libMenuNo = "";
 		do {
 			String libMenuFirst = (lDTO == null) ? "\n>>>> 사서 전용 메뉴 <<<<"
@@ -86,14 +87,25 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 					System.out.println(">>> 사서 전용 로그인을 해주세요!! <<<");
 				}
 				break;
-			// 나가기
+			// 대출연장
 			case "9":
+				if (lDTO != null) {
+					extendBook(lDTO, sc);
+					;
+				} else {
+					System.out.println(">>> 사서 전용 로그인을 해주세요!! <<<");
+				}
+			break;
+			// 대여횟수 조회
+			case "10":
+				showCount(sc);
+			case "11":
 				break;
 			default:
 				System.out.println(">>> 메뉴에 없는 번호 입니다. 다시 선택하세요!!");
 				break;
 			}
-		} while (!"9".equals(libMenuNo)); // end of do~while
+		} while (!"11".equals(libMenuNo)); // end of do~while
 
 	} // end of librarianMenu
 
@@ -369,6 +381,24 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		if (!file.exists()) {
 			rList = new ArrayList<>();
 		}
+		
+		File file_ConutDTO = new File(COUNTDTOLIST); 
+	    ArrayList<CountDTO> countDTOList = new ArrayList<CountDTO>();
+	    CountDTO countDTO = new CountDTO();
+	    if (!file_ConutDTO.exists()) {
+	         countDTOList = new ArrayList<CountDTO>();
+	         for (int i=0; i<sbList.size(); i++) {
+	            countDTO = new CountDTO("0", sbList.get(i));
+	            countDTOList.add(countDTO);
+	         }
+	         // 파일이 존재한다면
+	      } else {
+	         Object libListObj3 = serial.getObjectFromFile(COUNTDTOLIST);
+	         countDTOList = (ArrayList<CountDTO>) libListObj3;
+	      }
+	    
+	    
+
 
 		System.out.println("\n >>> 도서대여하기 <<<");
 		MemberDTO mDTO = null;
@@ -430,8 +460,6 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 					i--; // 잘못 입력 시 입력 기회 다시 부여
 					// 도서ID 입력 시
 				} else {
-					boolean state = sbList.get(i).getIsLendable(); // 도서 대여상태
-					state = !state; // 대여상태 전환
 					sbDTO = sbList.get(i);
 					RentalDTO rDTO = new RentalDTO(memId, bookId, mDTO, sbDTO);
 					rDTO.setLendDate();
@@ -451,8 +479,19 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 					break;
 				}
 			}
+            for (int k=0; k<countDTOList.size(); k++) {
+                if (countDTOList.get(k).getSeperateBookDTO().getBookId().equals(bookId)) {
+                   String temp_cnt = countDTOList.get(k).getCount();
+                   SeparateBookDTO temp_sbBookDTO = countDTOList.get(k).getSeperateBookDTO();
+                   countDTOList.remove(k);
+                   countDTO = new CountDTO(String.valueOf(Integer.parseInt(temp_cnt) + 1), temp_sbBookDTO);
+                   countDTOList.add(countDTO);
+                   break;
+                }
+             }
+
 		} // end of for
-		
+		serial.objectToFileSave(countDTOList, COUNTDTOLIST);
 		int m = serial.objectToFileSave(sbList, SBOOKFILENAME);
 		
 		int n = serial.objectToFileSave(rList, RENTALBOOKLISTFILENAME);
@@ -462,7 +501,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		} else {
 			System.out.println(">>> 대여등록 실패!! <<<");
 		}
-	} // end of lendBook
+	} // end of lendBook	
 
 	// 대여중인도서조회
 	@SuppressWarnings("unchecked")
@@ -475,8 +514,11 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 				+ "도서ID\t\t\tISBN\t\t\t도서명\t작가명\t출판사\t회원ID\t회원명\t연락처\t\t대여일자\t\t반납예정일\n"
 				+ "==================================================================================================================================");
 		for (RentalDTO dto : rList) {
-			System.out.println(dto.toString());
-
+			if (dto.isIfExtend()) {
+				System.out.println(dto.toString2());
+			} else {
+				System.out.println(dto.toString());
+			}
 		}
 
 	}
@@ -539,6 +581,141 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		}
 
 	}
+	
+	@Override
+	public void extendBook(LibrarianDTO lDTO, Scanner sc) {
+		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
+		List<RentalDTO> rList = (ArrayList<RentalDTO>)rListObj;
+		
+		Object mListObj = serial.getObjectFromFile(MEMBERLISTFILENAME);
+		List<MemberDTO> mList = (ArrayList<MemberDTO>) mListObj;
+		
+		Object sbListObj = serial.getObjectFromFile(SBOOKFILENAME);
+		List<SeparateBookDTO> sbList = (ArrayList<SeparateBookDTO>)sbListObj;
+		
+		RentalDTO rDTO = null;
+		System.out.println("\n >>> 도서연장하기 <<<");
+		System.out.print("▶ 총연장권수: ");
+		int extendNum = Integer.parseInt(sc.nextLine());
+		for(int i = 1; i <= extendNum; i++) {
+			String bookId = "";
+			do {
+				System.out.print("▶ 연장도서ID: ");
+				bookId = sc.nextLine();
+
+				if (isUseBookId(bookId)) {
+					System.out.println("~~~ 존재하지 않는 도서ID 입니다. 다시 입력하세요!! ~~~\n");
+					i--; // 잘못 입력 시 입력 기회 다시 부여
+					// 도서ID 입력 시
+				} else {
+					break;
+				} // end of if~else
+			} while (true);
+			
+			boolean or = false;
+			for (int j = 0; j<rList.size(); j++) {
+				if (rList.get(j).getBookId().equals(bookId)) {
+					if(rList.get(j).isIfExtend()) {
+						System.out.println("~~~~~ 이미 대출연장을 하셨습니다. 더 이상 대출연장이 불가능합니다.!!!");
+						return;
+					}
+				       
+				    rDTO = rList.get(j);
+				    rList.remove(j);
+				    or = true;
+				    break;
+				} // end of if
+			} // end of for
+			
+			if(or) {
+				File file = new File(RENTALBOOKLISTFILENAME);
+				// 파일이 존재하지 않는 경우
+				if (!file.exists()) {
+					rList = new ArrayList<>();
+				}
+
+				System.out.println("\n >>> 도서대여하기 <<<");
+				MemberDTO mDTO = null;
+				String memId = "";
+				// 일치하는 회원ID 입력 시 다음 단계
+				boolean confirm = false;
+				while (true) {
+					System.out.print("▶회원ID : ");
+					memId = sc.nextLine();
+					if (!memId.trim().isEmpty() && mList != null) {
+						for (int a=0; a<mList.size(); a++) {
+							if (mList.get(a).getMemId().equals(memId)) {
+								confirm = true;
+								mDTO = mList.get(a);
+								break;
+							}
+						}
+
+					} else if (memId.trim().isEmpty() || confirm == false){
+						System.out.println("~~~ 등록된 회원ID가 아닙니다 ~~~");
+						continue;
+					}
+					break;	
+				}
+
+				System.out.print("▶ 총대여권수: ");
+				int lendNum = Integer.parseInt(sc.nextLine());
+				SeparateBookDTO sbDTO = null;
+				boolean bookStatus = true;
+
+				for (int b = 1; b <= lendNum; b++) {
+					System.out.print("▶ 도서ID: ");
+					bookId = sc.nextLine();
+					for (int k = 0; k < sbList.size(); k++) {
+						if (isUseBookId(bookId)) {
+							bookStatus = false;
+							i--; // 잘못 입력 시 입력 기회 다시 부여
+							// 도서ID 입력 시
+						} else {
+							sbDTO = sbList.get(i);
+							RentalDTO rDTO2 = new RentalDTO(memId, bookId, mDTO, sbDTO);
+							rDTO2.setLendDate();
+							rList.add(rDTO2);
+							break;
+						} // end of if~else
+					} // end of for
+
+					if (!bookStatus) {
+						System.out.println("~~~ 존재하지 않는 도서ID 입니다. 다시 입력하세요!! ~~~\n");
+					}
+					
+					// 도서 상태를 대여중으로 고쳐준다.
+					for(int k=0; k<sbList.size(); k++) {
+						if(bookId.equals(sbList.get(k).getBookId()) ) {
+							sbList.get(k).setLendable(true);
+							break;
+						}
+					}
+					
+					for(int k=0; k<rList.size(); k++) {
+						if(bookId.equals(rList.get(k).getBookId()) ) {
+							rList.get(k).setIfExtend(true);
+							break;
+						}
+					}
+					
+					
+				} // end of for
+			}
+		} // end of for
+		
+		int m = serial.objectToFileSave(sbList, SBOOKFILENAME);
+
+		int n = serial.objectToFileSave(rList, RENTALBOOKLISTFILENAME);
+		if (m == 1 && n == 1) {
+			System.out.println(">>> 도서연장 성공!! <<<");
+		} else {
+			System.out.println(">>> 도서반납 실패!! <<<");
+		}
+		
+	}
+	
+	
 
 	// 일반회원 전용메뉴
 	@Override
@@ -566,5 +743,18 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 	@Override
 	public void myRentalBookInfo(MemberDTO mDTO, Scanner sc) {
 	}
+
+	   @Override
+	   public void showCount(Scanner sc) {
+	      ArrayList<CountDTO> list = new ArrayList<CountDTO>();
+	      Object libListObj3 = serial.getObjectFromFile(COUNTDTOLIST);
+	      list = (ArrayList<CountDTO>) libListObj3;
+	      
+	      for (int i=0; i<list.size(); i++) {
+	         System.out.println(list.get(i).toString());
+	      }
+	   }
+
+	
 
 } // end of class
