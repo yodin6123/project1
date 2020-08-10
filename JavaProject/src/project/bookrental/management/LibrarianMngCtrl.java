@@ -373,7 +373,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		boolean bk = false; // do~while문 빠져나오기 위한 변수
 		boolean confirm = false;
 		while (true) {
-			System.out.println("▶회원ID : ");
+			System.out.print("▶회원ID : ");
 			memId = sc.nextLine();
 			for (int j=0; j<rList.size(); j++) {
 				if (rList.get(j).getmDTO().getMemId().equals(memId)) {
@@ -467,9 +467,9 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
 		List<RentalDTO> rList = (ArrayList<RentalDTO>) rListObj;
 
-		System.out.println("======================================================================\n"
-				+ "도서ID\tISBN\t도서명\t작가명\t출판사\t회원ID\t회원명\t연락처\t대여일자\t반납예정일\n"
-				+ "======================================================================");
+		System.out.println("==================================================================================================================================\n"
+				+ "도서ID\t\t\tISBN\t\t\t도서명\t작가명\t출판사\t회원ID\t회원명\t연락처\t\t대여일자\t\t반납예정일\n"
+				+ "==================================================================================================================================");
 		for (RentalDTO dto : rList) {
 			System.out.println(dto.toString());
 
@@ -560,12 +560,6 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 
 	@Override
 	public void myRentalBookInfo(MemberDTO mDTO, Scanner sc) {
-	}
-
-	@Override
-	public boolean returnDateConf(String memId) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 } // end of class

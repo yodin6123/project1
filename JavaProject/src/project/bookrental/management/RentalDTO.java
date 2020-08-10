@@ -135,7 +135,7 @@ public class RentalDTO implements Serializable {
 				sbDTO.getBookDTO().getPublisher() + "\t" +
 				memId + "\t" +
 				lendDate + "\t" +
-				returnDate + "\n";
+				returnDate;
 	}
 	
 }

@@ -70,8 +70,6 @@ public interface InterLibrarymngctrl {
 	 */
 	void lendingBookInfo(LibrarianDTO lDTO); // 대여중인도서조회
 	
-	boolean returnDateConf(String memId); // 반납예정일 확인
-	
 	/*
 	 * 도서반납
 	 * 대여DTO에 접근하여 입력받은 반납권수와 도서ID와 일치하는 대여도서 객체를 리스트와 파일에서

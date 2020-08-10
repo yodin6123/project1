@@ -245,9 +245,9 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 			}
 		} 
 		
-		System.out.println("==========================================================================================\n"
-				+ "ISBN\t\t\t도서아이디\t\t\t도서명\t작가명\t출판사\t가격\t대여상태\n"
-				+ "==========================================================================================");
+		System.out.println("====================================================================================================\n"
+				+ "ISBN\t\t\t도서아이디\t\t\t도서명\t작가명\t출판사\t\t가격\t\t대여상태\n"
+				+ "====================================================================================================");
 		String temp = null;
 		 
 		for (int i=0; i<list.size(); i++) {
@@ -273,19 +273,18 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
 		List<RentalDTO> rList = (ArrayList<RentalDTO>)rListObj;
 		
-		System.out.println("======================================================================\n"
-				+ "도서아이디\tISBN\t도서명\t작가명\t출판사\t회원ID\t대여상태\t반납예정일\n"
-				+ "======================================================================");
+		System.out.println("==============================================================================================================\n"
+				+ "도서아이디\t\t\tISBN\t\t\t도서명\t작가명\t출판사\t회원ID\t대여일자\t\t반납예정일\n"
+				+ "==============================================================================================================");
 		boolean lendStatus = true;
 		for(int i=0; i<rList.size(); i++) {
 			if(mDTO.getMemId().equals(rList.get(i).getMemId())) {
-				System.out.println(rList.get(i).toStringSnd());
-			} else {
 				lendStatus = false;
-			}
+				System.out.println(rList.get(i).toStringSnd());
+			} 
 		}
 		
-		if(!lendStatus) {
+		if(lendStatus) {
 			System.out.println("~~~ 대여해가신 도서가 없습니다. ~~~");
 		}
 	}
@@ -333,11 +332,6 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	
 	@Override
 	public void lendingBookInfo(LibrarianDTO lDTO) {}
-	
-	@Override
-	public boolean returnDateConf(String memId) {
-		return false;
-	}
 	
 	@Override
 	public void returnBook(LibrarianDTO lDTO, Scanner sc) {}
