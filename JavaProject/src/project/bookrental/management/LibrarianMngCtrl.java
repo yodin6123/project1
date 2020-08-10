@@ -1,11 +1,11 @@
 package project.bookrental.management;
 
 import java.io.File;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -305,7 +305,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 			} // end of if~else
 		} while (true); // end of do~while
 
-		boolean isRentable = true;
+		boolean isRentable = false;
 
 		// 개별도서DTO 생성
 		SeparateBookDTO sbDTO = new SeparateBookDTO(isbn, bookId, isRentable, bDTO);
@@ -356,44 +356,61 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 
 		Object sbListObj = serial.getObjectFromFile(SBOOKFILENAME);
 		List<SeparateBookDTO> sbList = (ArrayList<SeparateBookDTO>) sbListObj;
+		
+		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
+		List<RentalDTO> rList = (ArrayList<RentalDTO>) rListObj;
+		
+		File file = new File(RENTALBOOKLISTFILENAME);
+		// 파일이 존재하지 않는 경우
+		if (!file.exists()) {
+			rList = new ArrayList<>();
+		}
 
 		System.out.println("\n >>> 도서대여하기 <<<");
 		MemberDTO mDTO = null;
 		String memId = "";
 		// 일치하는 회원ID 입력 시 다음 단계
 		boolean bk = false; // do~while문 빠져나오기 위한 변수
-		boolean idStatus = true; // 등록 아이디 확인 위한 변수
-		do {
-			System.out.print("▶ 회원ID: ");
+		boolean confirm = false;
+		while (true) {
+			System.out.println("▶회원ID : ");
 			memId = sc.nextLine();
-			for (MemberDTO dto : mList) {
-				if (!dto.getMemId().equals(memId)) {
-					idStatus = false;
-				} else if (returnDateConf(memId)) {
-					System.out.println("~~~~~ 반납예정일을 넘긴 미반납된 도서가 존재하므로 도서대여가 불가능합니다.!!!");
-					break;
-				} else {
-					mDTO = dto;
-					bk = true;
-					break;
-				} // end of if~else
-			} // end of for
-
-			if (!idStatus || memId.trim().isEmpty()) {
-				System.out.println("~~~ 등록된 회원ID가 아닙니다 ~~~\n");
+			for (int j=0; j<rList.size(); j++) {
+				if (rList.get(j).getmDTO().getMemId().equals(memId)) {
+					Calendar time = Calendar.getInstance();
+					SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd");
+					
+					try {
+						Date to = Date.valueOf(rList.get(j).getReturnDate());
+						Date current = new Date(System.currentTimeMillis());
+						
+						long calDate = to.getTime() - current.getTime();
+				        long calDateDays = calDate / ( 24*60*60*1000); 
+				        calDateDays = Math.abs(calDateDays);
+				        if (calDateDays > 0) {
+				        	System.out.println("~~~~~ 반납예정일을 넘긴 미반납된 도서가 존재하므로 도서대여가 불가능합니다.!!!");
+				        	return;
+				        }
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 			}
-		} while (!bk); // end of do~while
+			if (!memId.trim().isEmpty() && mList != null) {
+				for (int i=0; i<mList.size(); i++) {
+					if (mList.get(i).getMemId().equals(memId)) {
+						confirm = true;
+						mDTO = mList.get(i);
+						break;
+					}
+				}
 
-		File file = new File(RENTALBOOKLISTFILENAME);
-
-		List<RentalDTO> rList = null;
-		// 파일이 존재하지 않는 경우
-		if (!file.exists()) {
-			rList = new ArrayList<>();
-		} else {
-			Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
-			rList = (ArrayList<RentalDTO>) rListObj;
-		} // end of if~else
+			} else if (memId.trim().isEmpty() || confirm == false){
+				System.out.println("~~~ 등록된 회원ID가 아닙니다 ~~~");
+				continue;
+			}
+			break;	
+		}
 
 		System.out.print("▶ 총대여권수: ");
 		int lendNum = Integer.parseInt(sc.nextLine());
@@ -415,7 +432,6 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 					sbDTO = sbList.get(i);
 					RentalDTO rDTO = new RentalDTO(memId, bookId, mDTO, sbDTO);
 					rDTO.setLendDate();
-					rDTO.setReturnDate();
 					rList.add(rDTO);
 					break;
 				} // end of if~else
@@ -424,53 +440,26 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 			if (!bookStatus) {
 				System.out.println("~~~ 존재하지 않는 도서ID 입니다. 다시 입력하세요!! ~~~\n");
 			}
+			
+			// 도서 상태를 대여중으로 고쳐준다.
+			for(int k=0; k<sbList.size(); k++) {
+				if(bookId.equals(sbList.get(k).getBookId()) ) {
+					sbList.get(k).setLendable(true);
+					break;
+				}
+			}
 		} // end of for
-
+		
+		int m = serial.objectToFileSave(sbList, SBOOKFILENAME);
+		
 		int n = serial.objectToFileSave(rList, RENTALBOOKLISTFILENAME);
-		if (n == 1) {
+		if (m == 1 && n == 1) {
 			System.out.println(">>> 대여등록 성공!! <<<");
 			System.out.println(">>> 대여도서 비치중에서 대여중으로 변경함 <<<");
 		} else {
 			System.out.println(">>> 대여등록 실패!! <<<");
 		}
 	} // end of lendBook
-
-	// 반납예정일 확인
-	@Override
-	public boolean returnDateConf(String memId) {
-		boolean overDate = false;
-
-		File file = new File(RENTALBOOKLISTFILENAME);
-
-		if (!file.exists()) { // 도서관 최초 대여일 경우
-			overDate = false;
-		} else {
-			Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
-			List<RentalDTO> rList = (ArrayList<RentalDTO>) rListObj;
-
-			String sDate = "";
-			for (RentalDTO dto : rList) {
-				if (memId.equals(dto.getMemId())) {
-					sDate = dto.getReturnDate();
-				}
-			}
-
-			SimpleDateFormat f = new SimpleDateFormat();
-			try {
-				Date returnDate = f.parse(sDate);
-				Date today = new Date();
-				long over = returnDate.getTime() - today.getTime();
-
-				if (over < 0) {
-					overDate = true;
-				}
-			} catch (ParseException e) {
-
-			}
-		}
-
-		return overDate;
-	}
 
 	// 대여중인도서조회
 	@Override
@@ -482,7 +471,7 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 				+ "도서ID\tISBN\t도서명\t작가명\t출판사\t회원ID\t회원명\t연락처\t대여일자\t반납예정일\n"
 				+ "======================================================================");
 		for (RentalDTO dto : rList) {
-			System.out.println(dto);
+			System.out.println(dto.toString());
 
 		}
 
@@ -490,6 +479,9 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 
 	@Override
 	public void returnBook(LibrarianDTO lDTO, Scanner sc) {
+		Object sbListObj = serial.getObjectFromFile(SBOOKFILENAME);
+		List<SeparateBookDTO> sbList = (ArrayList<SeparateBookDTO>)sbListObj;
+		
 		Object rListObj = serial.getObjectFromFile(RENTALBOOKLISTFILENAME);
 		List<RentalDTO> rList = (ArrayList<RentalDTO>) rListObj;
 
@@ -516,18 +508,24 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 			for (int j = 0; j < rList.size(); j++) {
 				if (!isUseBookId(bookId)) {
 					rList.get(j).setFee();
-					System.out.println("도서별 연체료: " + rList.get(j).printFee());
-					sumFee += rList.get(j).getFee();
-					boolean state = rList.get(j).getSbDTO().getIsLendable(); // 도서 대여상태
-					state = !state; // 대여상태 전환
+					System.out.println("도서별 연체료: " + (Integer.parseInt((rList.get(j).getFee(rList.get(j).getReturnDate())))*200) + "원");
+					sumFee += Integer.parseInt(rList.get(j).getFee(rList.get(j).getReturnDate())) * 200;
+					for(int k=0; k < sbList.size(); k++) {
+						if(sbList.get(k).getBookId().equals(bookId)) {
+							sbList.get(k).setLendable(false); // 도서 대여상태
+							break;
+						}
+					}
 					rList.remove(j); // 대여목록 삭제
 					break;
 				}
 			}
 		} // end of for
+		
+		int m = serial.objectToFileSave(sbList, SBOOKFILENAME);
 
 		int n = serial.objectToFileSave(rList, RENTALBOOKLISTFILENAME);
-		if (n == 1) {
+		if (m == 1 && n == 1) {
 			System.out.println(">>> 도서반납 성공!! <<<");
 			System.out.println(">>> 대여도서 대여중에서 비치중으로 변경함 <<<");
 			System.out.println("▶ 연체료 총계: " + sumFee + "원");
@@ -562,6 +560,12 @@ public class LibrarianMngCtrl implements InterLibrarymngctrl {
 
 	@Override
 	public void myRentalBookInfo(MemberDTO mDTO, Scanner sc) {
+	}
+
+	@Override
+	public boolean returnDateConf(String memId) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 } // end of class

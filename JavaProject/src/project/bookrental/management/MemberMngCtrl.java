@@ -172,8 +172,7 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 	// 도서검색
 	@Override
 	public void searchBook(MemberDTO mDTO, Scanner sc) {
-		Object sbListObj = serial.getObjectFromFile(SBOOKFILENAME);
-		List<SeparateBookDTO> sbList = (ArrayList<SeparateBookDTO>)sbListObj;
+		
 
 		SeparateBookDTO bDTO = new SeparateBookDTO();
 
@@ -188,80 +187,84 @@ public class MemberMngCtrl implements InterLibrarymngctrl {
 		System.out.print("▶ 출판사명: ");
 		String publisher = sc.nextLine();
 		
-		// 하나의 조건을 거쳐가며 모든 조건을 만족하는 객체 찾아낸다.
-		// 조건을 거치며 찾아낸 객체는 List에 저장하고 업데이트한다.
-		// 검색값이 존재하지 않는 것이라면 해당 리스트의 새로운 리스트 객체를 넘겨주어 null의 크기를 요하는 에러를 방지한다.
-		List<SeparateBookDTO> newList = null;
-		// 카테고리 조건을 만족하는 객체를 새로운 리스트에 저장하고 공백 시 파일로 불러온 리스트를 그대로 새로운 리스트로 넘겨준다.
-		if(!category.trim().isEmpty()) {
-			for(int i=0; i<sbList.size(); i++) {
-				if(category.equalsIgnoreCase(sbList.get(i).getBookDTO().getCategory())) {
-					bDTO = sbList.get(i);
-					newList.add(bDTO);
-				} else {
-					newList = new ArrayList<>();
-				} // end of if
-			} // end of for
-		} else {
-			newList = sbList;
-		} // end of if
+		ArrayList<SeparateBookDTO> answer_category = new ArrayList<SeparateBookDTO>();
+		ArrayList<SeparateBookDTO> answer_bookname = new ArrayList<SeparateBookDTO>();
+		ArrayList<SeparateBookDTO> answer_author = new ArrayList<SeparateBookDTO>();
+		ArrayList<SeparateBookDTO> answer_publisher = new ArrayList<SeparateBookDTO>();
 		
-		List<SeparateBookDTO> newList2 = null;
-		// 도서명 조건을 만족하는 객체를 새로운 리스트에 추가하고 공백 시 그대로 리스트를 넘겨준다.
-		if(!bookName.trim().isEmpty()) {
-			for(int i=0; i<newList.size(); i++) {
-				if(bookName.equalsIgnoreCase(sbList.get(i).getBookDTO().getBookName())) {
-					bDTO = newList.get(i);
-					newList2.add(bDTO);
-				} else {
-					newList2 = new ArrayList<>();
-				} // end of if
-			} // end of for
-		} else {
-			newList2 = newList;
-		} // end of if
+		ArrayList<SeparateBookDTO> list = new ArrayList<SeparateBookDTO>();
 		
-		List<SeparateBookDTO> newList3 = null;
-		// 작가명 조건을 만족하는 객체를 새로운 리스트에 추가하고 공백 시 그대로 리스트를 넘겨준다.
-		if(!author.trim().isEmpty()) {
-			for(int i=0; i<newList2.size(); i++) {
-				if(author.equalsIgnoreCase(sbList.get(i).getBookDTO().getAuthor())) {
-					bDTO = newList2.get(i);
-					newList3.add(bDTO);
-				} else {
-					newList3 = new ArrayList<>();
-				} // end of if
-			} // end of for
-		} else {
-			newList3 = newList2;
-		} // end of if
+		Object sbListObj = serial.getObjectFromFile(SBOOKFILENAME);
+		list = (ArrayList<SeparateBookDTO>)sbListObj;
 		
-		List<SeparateBookDTO> newList4 = null;
-		// 출판사명 조건을 만족하는 객체를 새로운 리스트에 추가하고 공백 시 그대로 리스트를 넘겨준다.
-		if(!publisher.trim().isEmpty()) {
-			for(int i=0; i<newList3.size(); i++) {
-				if(publisher.equalsIgnoreCase(sbList.get(i).getBookDTO().getPublisher())) {
-					bDTO = newList3.get(i);
-					newList4.add(bDTO);
-				} else {
-					newList4 = new ArrayList<>();
-				} // end of if
-			} // end of for
-		} else {
-			newList4 = newList3;
-		} // end of if
+		boolean flag1 = false;
+		boolean flag2 = false;
+		boolean flag3 = false;
+		boolean flag4 = false;
+		boolean flag5 = false;
+		if (list != null) {
+			if (!category.trim().isEmpty()) {
+				for (int c=0; c<list.size(); c++) {
+					if (list.get(c).getBookDTO().getCategory().equalsIgnoreCase(category)) {
+						answer_category.add(list.get(c));
+					}
+				} 
+			} else {
+				flag1 = true;
+				answer_category = list;
+			}
+			if (!bookName.trim().isEmpty()) {
+				for (int c=0; c<list.size(); c++) {
+					if (list.get(c).getBookDTO().getBookName().equalsIgnoreCase(bookName)) {
+						answer_bookname.add(list.get(c));
+					}
+				}
+			} else {
+				flag2 = true;
+				answer_bookname = list;
+			}
+			if (!author.trim().isEmpty()) {
+				for (int c=0; c<list.size(); c++) {
+					if (list.get(c).getBookDTO().getAuthor().equalsIgnoreCase(author)) {
+						answer_author.add(list.get(c));
+					}
+				}
+			} else {
+				flag3 = true;
+				answer_author = list;
+			}
+			if (!publisher.trim().isEmpty()) {
+				for (int c=0; c<list.size(); c++) {
+					if (list.get(c).getBookDTO().getPublisher().equalsIgnoreCase(publisher)) {
+						answer_publisher.add(list.get(c));
+					}
+				}
+			} else {
+				flag4 = true;
+				answer_publisher = list;
+			}
+		} 
 		
 		System.out.println("==========================================================================================\n"
 				+ "ISBN\t\t\t도서아이디\t\t\t도서명\t작가명\t출판사\t가격\t대여상태\n"
 				+ "==========================================================================================");
-		if(newList4!=null) {		
-			// toString() 재정의 및 호출
-			for(SeparateBookDTO dto : newList4) {
-				System.out.println(dto);
+		String temp = null;
+		 
+		for (int i=0; i<list.size(); i++) {
+			if (answer_category.contains(list.get(i)) && answer_bookname.contains(list.get(i)) && answer_author.contains(list.get(i)) && answer_publisher.contains(list.get(i))) {
+				flag5 = true;
+				if (list.get(i).getIsLendable() == false) {
+					temp = "비치중";
+				} else {
+					temp = "대여중";
+				}
+				System.out.print(list.get(i).toString()); 
+				System.out.printf("        %,d", list.get(i).getBookDTO().getPrice());
+				System.out.printf("		%s\n", temp);
 			}
-		} else {
-			System.out.println("~~~~ 검색에 일치하는 도서가 없습니다. ~~~~");
 		}
+		
+		if (!flag5) System.out.println("~~~ 검색에 일치하는 도서가 없습니다 ~~~");
 		
 	} // end of searchBook()
 	

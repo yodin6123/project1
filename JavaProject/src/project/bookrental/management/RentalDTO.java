@@ -1,11 +1,11 @@
 package project.bookrental.management;
 
 import java.io.Serializable;
+import java.sql.Date;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
@@ -16,7 +16,7 @@ public class RentalDTO implements Serializable {
 	private String bookId;
 	private String lendDate;
 	private String returnDate;
-	private int fee;
+	private String fee;
 	private MemberDTO mDTO;
 	private SeparateBookDTO sbDTO;
 	
@@ -50,55 +50,48 @@ public class RentalDTO implements Serializable {
 	}
 
 	public void setLendDate() {
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
-		Calendar cal = new GregorianCalendar(Locale.KOREA);
-		cal.setTime(new Date());
-		lendDate = format.format(cal.getTime());
+		SimpleDateFormat sdfm = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Calendar time = Calendar.getInstance();
+		time.add(Calendar.DATE, -3);
+		lendDate = sdfm.format(time.getTime());
+		time.add(Calendar.DATE, 2);
+		this.returnDate = sdfm.format(time.getTime());
 	}
 
 	public String getReturnDate() {
 		return returnDate;
 	}
 
-	public void setReturnDate() {
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
-		try {
-			Date dLendDate = format.parse(lendDate);
-			Calendar cal = new GregorianCalendar(Locale.KOREA);
-			cal.setTime(dLendDate);
-			cal.add(Calendar.DAY_OF_MONTH, 3);
-			
-			returnDate = format.format(cal.getTime());
-		} catch (ParseException e) {
-			System.out.println("~~~ 반납예정일은 날짜모양을 띄는 String 타입이어야 합니다.");
-		}
+	public void setReturnDate(String returnDate) {
+		this.returnDate = returnDate;
 	}
 
-	public int getFee() {
+	public String getFee(String returnDate) {
+		Calendar time = Calendar.getInstance();
+		SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd");
+
+		try {
+			Date to = Date.valueOf(returnDate);
+			Date current = new Date(System.currentTimeMillis());
+			
+			long calDate = to.getTime() - current.getTime();
+	        long calDateDays = calDate / ( 24*60*60*1000); 
+	        calDateDays = Math.abs(calDateDays);
+	        fee = String.valueOf(calDateDays);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return fee;
 	}
 
 	public void setFee() {
-		SimpleDateFormat f = new SimpleDateFormat("yyyy-mm-dd");
-		try {
-			Date dReturnDate = f.parse(returnDate);
-			String sToday = f.format(new Date());
-			Date today = f.parse(sToday);
-			long over = today.getTime() - dReturnDate.getTime();
-			long overDays = over/(1000*60*60*24);
-			
-			if(overDays>=1) {
-				fee = ((int)overDays) * 100;
-			}
-		} catch (ParseException e) {
-			
-		}
+		
 	}
 	
 	public String printFee() {
-		DecimalFormat df = new DecimalFormat("#.###");
-		String sFee = (String)df.format(fee);
-		return sFee + "원";
+		return null;
 	}
 
 	public MemberDTO getmDTO() {

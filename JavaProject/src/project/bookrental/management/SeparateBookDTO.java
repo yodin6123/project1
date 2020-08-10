@@ -9,7 +9,7 @@ public class SeparateBookDTO implements Serializable {
 	private static final long serialVersionUID = -1152724621094187774L;
 	private String isbn;
 	private String bookId;
-	private boolean isLendable; // 비치 중일 때 true, 대여 중일 때 false
+	private boolean isLendable; // 대여 중일 때 true, 비치 중일 때 false
 	private BookDTO bookDTO;
 	private Calendar lendDate;
 	
@@ -87,9 +87,7 @@ public class SeparateBookDTO implements Serializable {
 				bookId + "\t" + 
 				bookDTO.getBookName() + "    " + 
 				bookDTO.getAuthor() + "\t" +
-				bookDTO.getPublisher() + "\t" + 
-				getPriceComma(bookDTO.getPrice()) + "\t" + 
-				sIsLendable(isLendable);
+				bookDTO.getPublisher() + "\t";
 	}
 
 }
